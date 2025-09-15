@@ -102,9 +102,15 @@ export function useConversation<T extends HookOptions & ControlledState>(
   const { micMuted, volume, serverLocation, ...defaultOptions } = props;
   const conversationRef = useRef<Conversation | null>(null);
   const lockRef = useRef<Promise<Conversation> | null>(null);
+  // Store current micMuted and volume in refs to always have up-to-date values by the time they're read in startSession
+  const micMutedRef = useRef<boolean | undefined>(micMuted);
+  const volumeRef = useRef<number | undefined>(volume);
   const [status, setStatus] = useState<Status>("disconnected");
   const [canSendFeedback, setCanSendFeedback] = useState(false);
   const [mode, setMode] = useState<Mode>("listening");
+
+  micMutedRef.current = micMuted;
+  volumeRef.current = volume;
 
   useEffect(() => {
     if (micMuted !== undefined) {
@@ -192,12 +198,12 @@ export function useConversation<T extends HookOptions & ControlledState>(
         } as Options);
 
         conversationRef.current = await lockRef.current;
-        // Persist controlled state between sessions
-        if (micMuted !== undefined) {
-          conversationRef.current.setMicMuted(micMuted);
+
+        if (micMutedRef.current !== undefined) {
+          conversationRef.current.setMicMuted(micMutedRef.current);
         }
-        if (volume !== undefined) {
-          conversationRef.current.setVolume({ volume });
+        if (volumeRef.current !== undefined) {
+          conversationRef.current.setVolume({ volume: volumeRef.current });
         }
 
         return conversationRef.current.getId();
