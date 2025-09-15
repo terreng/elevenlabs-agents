@@ -458,15 +458,18 @@ export class WebRTCConnection extends BaseConnection {
     });
   }
 
-  public async setAudioOutputDevice(deviceId: string): Promise<void> {
+  public async setAudioOutputDevice(deviceId?: string): Promise<void> {
     if (!("setSinkId" in HTMLAudioElement.prototype)) {
       throw new Error("setSinkId is not supported in this browser");
     }
 
+    // Use empty string for default device if no deviceId provided
+    const sinkId = deviceId || "";
+
     // Set output device for all existing audio elements
     const promises = this.audioElements.map(async element => {
       try {
-        await element.setSinkId(deviceId);
+        await element.setSinkId(sinkId);
       } catch (error) {
         console.error("Failed to set sink ID for audio element:", error);
         throw error;
@@ -475,11 +478,11 @@ export class WebRTCConnection extends BaseConnection {
 
     await Promise.all(promises);
 
-    // Store the device ID for future audio elements
-    this.outputDeviceId = deviceId;
+    // Store the device ID for future audio elements (null for default)
+    this.outputDeviceId = deviceId || null;
   }
 
-  public async setAudioInputDevice(deviceId: string): Promise<void> {
+  public async setAudioInputDevice(deviceId?: string): Promise<void> {
     if (!this.isConnected || !this.room.localParticipant) {
       throw new Error(
         "Cannot change input device: room not connected or no local participant"
@@ -501,12 +504,16 @@ export class WebRTCConnection extends BaseConnection {
 
       // Create constraints for the new input device
       const audioConstraints: MediaTrackConstraints = {
-        deviceId: { exact: deviceId },
         echoCancellation: true,
         noiseSuppression: true,
         autoGainControl: true,
         channelCount: { ideal: 1 },
       };
+
+      // Set deviceId constraint if a specific device is requested
+      if (deviceId) {
+        audioConstraints.deviceId = { exact: deviceId };
+      }
 
       // Create new audio track with the specified device
       const audioTrack = await createLocalAudioTrack(audioConstraints);

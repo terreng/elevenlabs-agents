@@ -251,25 +251,21 @@ export class VoiceConversation extends BaseConversation {
     try {
       // For WebSocket connections, try to change device on existing input first
       if (this.connection instanceof WebSocketConnection) {
-        if (inputDeviceId) {
-          try {
-            await this.input.setInputDevice(inputDeviceId);
-            return this.input;
-          } catch (error) {
-            console.warn(
-              "Failed to change device on existing input, recreating:",
-              error
-            );
-            // Fall back to recreating the input
-          }
+        try {
+          await this.input.setInputDevice(inputDeviceId);
+          return this.input;
+        } catch (error) {
+          console.warn(
+            "Failed to change device on existing input, recreating:",
+            error
+          );
+          // Fall back to recreating the input
         }
       }
 
       // Handle WebRTC connections differently
       if (this.connection instanceof WebRTCConnection) {
-        if (inputDeviceId) {
-          await this.connection.setAudioInputDevice(inputDeviceId);
-        }
+        await this.connection.setAudioInputDevice(inputDeviceId);
       }
 
       // Fallback: recreate the input
@@ -299,25 +295,21 @@ export class VoiceConversation extends BaseConversation {
     try {
       // For WebSocket connections, try to change device on existing output first
       if (this.connection instanceof WebSocketConnection) {
-        if (outputDeviceId) {
-          try {
-            await this.output.setOutputDevice(outputDeviceId);
-            return this.output;
-          } catch (error) {
-            console.warn(
-              "Failed to change device on existing output, recreating:",
-              error
-            );
-            // Fall back to recreating the output
-          }
+        try {
+          await this.output.setOutputDevice(outputDeviceId);
+          return this.output;
+        } catch (error) {
+          console.warn(
+            "Failed to change device on existing output, recreating:",
+            error
+          );
+          // Fall back to recreating the output
         }
       }
 
       // Handle WebRTC connections differently
       if (this.connection instanceof WebRTCConnection) {
-        if (outputDeviceId) {
-          await this.connection.setAudioOutputDevice(outputDeviceId);
-        }
+        await this.connection.setAudioOutputDevice(outputDeviceId);
       }
 
       // Fallback: recreate the output
