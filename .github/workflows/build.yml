@@ -31,3 +31,46 @@ jobs:
 
       - name: Run build
         run: pnpm run build
+        
+      - name: Create tarballs and release (only on main branch push)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          cd packages/client && pnpm pack
+          cd ../react && pnpm pack
+          
+      - name: Generate release tag
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        id: tag
+        run: |
+          TAG="v$(date +%Y%m%d-%H%M%S)-$(git rev-parse --short HEAD)"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          
+      - name: Create Release
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          release_name: "Auto-build ${{ steps.tag.outputs.tag }}"
+          body: |
+            Automated build from commit ${{ github.sha }}
+            
+            Install in your project:
+            ```bash
+            npm install https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/elevenlabs-react-0.6.2.tgz
+            ```
+          draft: false
+          prerelease: false
+          
+      - name: Upload React Package
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./packages/react/elevenlabs-react-0.6.2.tgz
+          asset_name: elevenlabs-react-0.6.2.tgz
+          asset_content_type: application/gzip
