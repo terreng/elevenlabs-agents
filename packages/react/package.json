@@ -18,9 +18,9 @@
   "scripts": {
     "generate-version": "printf \"// This file is auto-generated during build\\nexport const PACKAGE_VERSION = \\\"%s\\\";\\n\" \"$npm_package_version\" > src/version.ts",
     "prebuild": "pnpm run generate-version",
-    "build": "BROWSERSLIST_ENV=modern microbundle --jsx React.createElement --jsxFragment React.Fragment --jsxImportSource react src/index.ts",
+    "build": "BROWSERSLIST_ENV=modern microbundle --jsx React.createElement --jsxFragment React.Fragment --jsxImportSource react src/index.ts --no-external @elevenlabs/client",
     "clean": "rm -rf ./dist",
-    "dev": "pnpm run clean && pnpm run generate-version && BROWSERSLIST_ENV=development microbundle --jsx React.createElement --jsxFragment React.Fragment --jsxImportSource react src/index.ts -w -f modern",
+    "dev": "pnpm run clean && pnpm run generate-version && BROWSERSLIST_ENV=development microbundle --jsx React.createElement --jsxFragment React.Fragment --jsxImportSource react src/index.ts -w -f modern --no-external @elevenlabs/client",
     "lint": "pnpm run lint:ts && pnpm run lint:es && pnpm run lint:prettier",
     "lint:ts": "tsc --noEmit --skipLibCheck",
     "lint:es": "pnpm exec eslint .",
@@ -31,13 +31,11 @@
   "keywords": [],
   "author": "ElevenLabs",
   "license": "MIT",
-  "dependencies": {
-    "@elevenlabs/client": "workspace:*"
-  },
   "peerDependencies": {
     "react": ">=16.8.0"
   },
   "devDependencies": {
+    "@elevenlabs/client": "workspace:*",
     "@types/jest": "^29.5.12",
     "@types/react": "^18.3.3",
     "eslint": "^9.8.0",
