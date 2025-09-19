@@ -266,6 +266,7 @@ export class VoiceConversation extends BaseConversation {
       // Handle WebRTC connections differently
       if (this.connection instanceof WebRTCConnection) {
         await this.connection.setAudioInputDevice(inputDeviceId);
+        return this.input; // WebRTC handles device switching internally
       }
 
       // Fallback: recreate the input
@@ -279,6 +280,9 @@ export class VoiceConversation extends BaseConversation {
       });
 
       this.input = newInput;
+
+      // Reconnect the worklet message handler for the new input
+      this.input.worklet.port.onmessage = this.onInputWorkletMessage;
 
       return this.input;
     } catch (error) {
