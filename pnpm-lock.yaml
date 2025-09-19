@@ -282,13 +282,13 @@ importers:
 
   packages/react:
     dependencies:
-      '@elevenlabs/client':
-        specifier: workspace:*
-        version: link:../client
       react:
         specifier: '>=16.8.0'
         version: 19.0.0
     devDependencies:
+      '@elevenlabs/client':
+        specifier: workspace:*
+        version: link:../client
       '@types/jest':
         specifier: ^29.5.12
         version: 29.5.14
